@@ -1,0 +1,53 @@
+{
+  "name": "@pictomancer/node",
+  "version": "0.1.0",
+  "description": "Node.js SDK for Pictomancer.ai - thin client for the image optimization API at api.pictomancer.ai",
+  "license": "MIT",
+  "homepage": "https://pictomancer.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pictomancer/node-sdk.git"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.130",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^3.0.0"
+  },
+  "keywords": [
+    "image",
+    "optimization",
+    "resize",
+    "compress",
+    "convert",
+    "avif",
+    "webp",
+    "ai-agents",
+    "mcp",
+    "pictomancer"
+  ]
+}
