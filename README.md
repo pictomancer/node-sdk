@@ -42,7 +42,14 @@ import { writeFile } from "node:fs/promises";
 await writeFile("out.webp", out as Uint8Array);
 ```
 
-Sources can be an image URL, a base64 string, or a `data:` URI.
+Sources can be an image URL, a base64 string, or a `data:` URI. For local files or in-memory bytes:
+
+```ts
+import { Source } from "@pictomancer/node";
+
+const out = await client.compress(await Source.fromFile("photo.jpg"), { q: 80 });
+const out2 = await client.compress(Source.fromBytes(bytes), { q: 80 });
+```
 
 ## Delivery targets
 

@@ -26,4 +26,5 @@ export {
   type PutUrlOptions,
 } from "./delivery.js";
 export { PictomancerError } from "./errors.js";
+export { Source } from "./source.js";
 export { VERSION } from "./version.js";
