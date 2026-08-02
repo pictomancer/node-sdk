@@ -60,6 +60,8 @@ export interface ResizeOptions {
 export interface CompressOptions {
   format?: string;
   q?: number;
+  /** Smallest file with SSIM >= target (0 < v <= 1). Excludes q; needs explicit jpeg/webp/avif format. */
+  quality_target?: number;
   strip?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
@@ -67,6 +69,8 @@ export interface CompressOptions {
 
 export interface ConvertOptions {
   q?: number;
+  /** Smallest file with SSIM >= target (0 < v <= 1). Excludes q and lossless; jpeg/webp/avif only. */
+  quality_target?: number;
   strip?: boolean;
   lossless?: boolean;
   effort?: number;

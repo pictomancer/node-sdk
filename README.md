@@ -51,6 +51,23 @@ const out = await client.compress(await Source.fromFile("photo.jpg"), { q: 80 })
 const out2 = await client.compress(Source.fromBytes(bytes), { q: 80 });
 ```
 
+## Perceptual quality target
+
+Instead of guessing a `q` value, ask for the smallest file that keeps SSIM at or above a target. Supported on `compress` and `convert` for `jpeg`, `webp` and `avif`. Mutually exclusive with `q` (and with `lossless` on convert); `compress` requires an explicit `format`. Not available inside pipelines. The server rejects invalid combinations with a 422.
+
+```ts
+const out = await client.compress("https://example.com/image.jpg", {
+  format: "webp",
+  quality_target: 0.95,
+});
+
+const avif = await client.convert("https://example.com/image.jpg", "avif", {
+  quality_target: 0.9,
+});
+```
+
+The API reports the search outcome in response headers: `X-Pictomancer-Quality-Target`, `X-Pictomancer-Quality-Achieved`, `X-Pictomancer-Quality-Q-Final` and `X-Pictomancer-Quality-Encodes` (absent when no search ran). `X-Pig-Billed` is `0` when the input already met the target and came back untouched. The SDK returns the body only (bytes or receipt) and does not surface response headers.
+
 ## Delivery targets
 
 By default the optimized bytes come back inline. For large or async jobs, deliver straight to your storage or endpoint instead - the op then returns a JSON receipt:

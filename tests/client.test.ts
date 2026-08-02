@@ -148,6 +148,14 @@ describe("operation request bodies", () => {
     expect(requests[0].body).toEqual({ source: SOURCE, format: "jpeg", q: 60, strip: true });
   });
 
+  it("compress sends quality_target", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp", quality_target: 0.95 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", quality_target: 0.95 });
+  });
+
   it("convert sends format and encoder knobs", async () => {
     const { client, requests } = newTestClient({ body: IMAGE_BYTES });
 
@@ -161,6 +169,14 @@ describe("operation request bodies", () => {
       effort: 2,
       lossless: false,
     });
+  });
+
+  it("convert sends quality_target", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.convert(SOURCE, "avif", { quality_target: 0.9 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", quality_target: 0.9 });
   });
 
   it("crop sends region coordinates", async () => {
