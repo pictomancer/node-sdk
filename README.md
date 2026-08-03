@@ -51,6 +51,45 @@ const out = await client.compress(await Source.fromFile("photo.jpg"), { q: 80 })
 const out2 = await client.compress(Source.fromBytes(bytes), { q: 80 });
 ```
 
+## Geometry ops: smart crop, trim, fill, autorot
+
+`crop` has three mutually exclusive modes. Pass `null` for the positional
+`x`/`y`/`width`/`height` args not used by a given mode.
+
+```ts
+// Manual: exact rectangle.
+let out = await client.crop("https://example.com/image.jpg", 0, 0, 100, 100);
+
+// Smart: gravity picks the window. One of "attention" | "entropy" | "centre".
+out = await client.crop("https://example.com/image.jpg", null, null, 200, 200, {
+  gravity: "attention",
+});
+
+// Trim: removes a uniform background border. threshold defaults to 10.0 server-side.
+out = await client.crop("https://example.com/image.jpg", null, null, null, null, {
+  trim: true,
+  threshold: 5,
+});
+```
+
+`resize` gains a fill mode: pass `width` + `height` (instead of
+`scale`/`scale_x`/`scale_y`) to resize and smart-crop to exact dimensions in
+one call; `gravity` defaults to `"attention"`.
+
+```ts
+const out = await client.resize("https://example.com/image.jpg", {
+  width: 200,
+  height: 150,
+  gravity: "entropy",
+});
+```
+
+All four ops (`resize`, `compress`, `convert`, `crop`) accept `autorot: true`
+to apply EXIF orientation before processing.
+
+When a crop actually trims, the response carries
+`X-Pictomancer-Trim-Left/-Top/-Width/-Height` headers.
+
 ## Perceptual quality target
 
 Instead of guessing a `q` value, ask for the smallest file that keeps SSIM at or above a target. Supported on `compress` and `convert` for `jpeg`, `webp` and `avif`. Mutually exclusive with `q` (and with `lossless` on convert); `compress` requires an explicit `format`. Not available inside pipelines. The server rejects invalid combinations with a 422.

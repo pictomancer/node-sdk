@@ -1,6 +1,6 @@
 {
   "name": "@pictomancer/node",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Node.js SDK for Pictomancer.ai - thin client for the image optimization API at api.pictomancer.ai",
   "license": "MIT",
   "homepage": "https://pictomancer.ai",

@@ -225,6 +225,79 @@ describe("operation request bodies", () => {
   });
 });
 
+describe("geometry ops", () => {
+  it("resize sends fill mode params without scale", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.resize(SOURCE, { width: 200, height: 150, gravity: "entropy" });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, width: 200, height: 150, gravity: "entropy" });
+  });
+
+  it("resize sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.resize(SOURCE, { scale: 0.5, autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, scale: 0.5, autorot: true });
+  });
+
+  it("compress sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp", autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", autorot: true });
+  });
+
+  it("convert sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.convert(SOURCE, "avif", { autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", autorot: true });
+  });
+
+  it("crop smart mode sends gravity without x/y", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, null, null, 200, 200, { gravity: "attention" });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, width: 200, height: 200, gravity: "attention" });
+  });
+
+  it("crop trim mode sends threshold without dims", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, null, null, null, null, { trim: true, threshold: 5 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, trim: true, threshold: 5 });
+  });
+
+  it("crop manual mode regression with numeric args", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, 10, 20, 300, 400, { format: "png" });
+
+    expect(requests[0].body).toEqual({
+      source: SOURCE,
+      x: 10,
+      y: 20,
+      width: 300,
+      height: 400,
+      format: "png",
+    });
+  });
+
+  it("crop sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, 0, 0, 100, 100, { autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, x: 0, y: 0, width: 100, height: 100, autorot: true });
+  });
+});
+
 describe("delivery", () => {
   it("attaches put_url target to the body", async () => {
     const { client, requests } = newTestClient({ body: { sha256: "abc" } });
