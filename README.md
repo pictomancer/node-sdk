@@ -90,6 +90,28 @@ to apply EXIF orientation before processing.
 When a crop actually trims, the response carries
 `X-Pictomancer-Trim-Left/-Top/-Width/-Height` headers.
 
+## Enhance: denoise, auto-contrast, sharpen
+
+All four ops (`resize`, `compress`, `convert`, `crop`) accept three opt-in
+modifiers, applied in order `autorot -> denoise -> equalize -> op -> sharpen`.
+Base price, no surcharge.
+
+```ts
+const out = await client.compress("https://example.com/image.jpg", {
+  format: "webp",
+  denoise: 2,
+  equalize: true,
+  sharpen: true,
+});
+```
+
+- **`denoise`** - median denoise radius 1-3 (window 3x3 to 7x7) before the operation.
+- **`equalize`** - auto-contrast: histogram equalisation of the value channel, hue and saturation preserved.
+- **`sharpen`** - unsharp-mask sharpen after the operation (libvips defaults).
+
+A `compress` with any of the three that ends up larger than the input IS
+billed (`X-Pig-Billed: 1`), unlike a plain compress with no gain.
+
 ## Perceptual quality target
 
 Instead of guessing a `q` value, ask for the smallest file that keeps SSIM at or above a target. Supported on `compress` and `convert` for `jpeg`, `webp` and `avif`. Mutually exclusive with `q` (and with `lossless` on convert); `compress` requires an explicit `format`. Not available inside pipelines. The server rejects invalid combinations with a 422.

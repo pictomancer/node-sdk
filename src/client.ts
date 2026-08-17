@@ -63,6 +63,12 @@ export interface ResizeOptions {
   /** Fill-mode smart-crop strategy. Only valid with width+height; defaults to 'attention'. */
   gravity?: Gravity;
   autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
@@ -74,6 +80,12 @@ export interface CompressOptions {
   quality_target?: number;
   strip?: boolean;
   autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
@@ -86,6 +98,12 @@ export interface ConvertOptions {
   lossless?: boolean;
   effort?: number;
   autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
@@ -99,6 +117,12 @@ export interface CropOptions {
   /** Trim sensitivity (must be positive; default 10.0 server-side). Only valid with trim: true. */
   threshold?: number;
   autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }

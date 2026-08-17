@@ -298,6 +298,57 @@ describe("geometry ops", () => {
   });
 });
 
+describe("enhance ops", () => {
+  it("resize sends sharpen", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.resize(SOURCE, { scale: 0.5, sharpen: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, scale: 0.5, sharpen: true });
+  });
+
+  it("compress sends denoise", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp", denoise: 2 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", denoise: 2 });
+  });
+
+  it("convert sends equalize", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.convert(SOURCE, "avif", { equalize: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", equalize: true });
+  });
+
+  it("crop sends the three enhance params", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, 0, 0, 100, 100, { denoise: 1, equalize: true, sharpen: true });
+
+    expect(requests[0].body).toEqual({
+      source: SOURCE,
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      denoise: 1,
+      equalize: true,
+      sharpen: true,
+    });
+  });
+
+  it("enhance params are omitted by default", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp" });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp" });
+  });
+});
+
 describe("delivery", () => {
   it("attaches put_url target to the body", async () => {
     const { client, requests } = newTestClient({ body: { sha256: "abc" } });
