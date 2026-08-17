@@ -179,6 +179,28 @@ describe("operation request bodies", () => {
     expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", quality_target: 0.9 });
   });
 
+  it("optimizeGenerated sends only source by default", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.optimizeGenerated(SOURCE);
+
+    expect(requests[0].url).toBe("https://api.pictomancer.ai/v1/optimize_generated");
+    expect(requests[0].body).toEqual({ source: SOURCE });
+  });
+
+  it("optimizeGenerated forwards format, max_dimension and quality_target", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.optimizeGenerated(SOURCE, { format: "avif", max_dimension: 1600, quality_target: 0.9 });
+
+    expect(requests[0].body).toEqual({
+      source: SOURCE,
+      format: "avif",
+      max_dimension: 1600,
+      quality_target: 0.9,
+    });
+  });
+
   it("crop sends region coordinates", async () => {
     const { client, requests } = newTestClient({ body: IMAGE_BYTES });
 

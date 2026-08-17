@@ -108,6 +108,20 @@ export interface ConvertOptions {
   [extra: string]: unknown;
 }
 
+export interface OptimizeGeneratedOptions {
+  /** webp (server default), avif, jpeg or png. */
+  format?: string;
+  q?: number;
+  /** Smallest file with SSIM >= target (0 < v <= 1). Excludes q. */
+  quality_target?: number;
+  /** Cap on the longest side in pixels; never upscales. */
+  max_dimension?: number;
+  /** Server default true. */
+  strip?: boolean;
+  delivery?: DeliveryTarget;
+  [extra: string]: unknown;
+}
+
 export interface CropOptions {
   format?: string;
   /** Smart-crop mode: picks the window automatically. Requires width/height; excludes x/y and trim. */
@@ -180,6 +194,10 @@ export class Client {
 
   async convert(source: string, format: string, options: ConvertOptions = {}): Promise<OpResult> {
     return this.op("/v1/convert", { source, format }, options);
+  }
+
+  async optimizeGenerated(source: string, options: OptimizeGeneratedOptions = {}): Promise<OpResult> {
+    return this.op("/v1/optimize_generated", { source }, options);
   }
 
   /**

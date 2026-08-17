@@ -129,6 +129,14 @@ const avif = await client.convert("https://example.com/image.jpg", "avif", {
 
 The API reports the search outcome in response headers: `X-Pictomancer-Quality-Target`, `X-Pictomancer-Quality-Achieved`, `X-Pictomancer-Quality-Q-Final` and `X-Pictomancer-Quality-Encodes` (absent when no search ran). `X-Pig-Billed` is `0` when the input already met the target and came back untouched. The SDK returns the body only (bytes or receipt) and does not surface response headers.
 
+## AI-generated images: one call to web-ready
+
+Image generators (gpt-image, DALL-E, Flux, Midjourney, Stable Diffusion) return 2-8 MB PNGs. optimize_generated returns the same picture as web-ready webp (default), avif, jpeg or png: metadata stripped, transparency kept, optional max_dimension cap (never upscales), optional q or quality_target. Same price as convert; a result that is not smaller is returned free.
+
+```ts
+const out = await client.optimizeGenerated("https://example.com/gen.png", { format: "avif", max_dimension: 1600 });
+```
+
 ## Delivery targets
 
 By default the optimized bytes come back inline. For large or async jobs, deliver straight to your storage or endpoint instead - the op then returns a JSON receipt:
