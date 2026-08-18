@@ -48,11 +48,27 @@ export interface AnalyzeResponse {
   size_bytes: number;
 }
 
+/** Fill-mode and smart-crop strategy. British spelling per libvips: 'centre', not 'center'. */
+export type Gravity = "attention" | "entropy" | "centre";
+
 export interface ResizeOptions {
   scale?: number;
   scale_x?: number;
   scale_y?: number;
   format?: string;
+  /** Fill mode: target width in pixels. Requires height; excludes scale/scale_x/scale_y. */
+  width?: number;
+  /** Fill mode: target height in pixels. Requires width. */
+  height?: number;
+  /** Fill-mode smart-crop strategy. Only valid with width+height; defaults to 'attention'. */
+  gravity?: Gravity;
+  autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
@@ -60,22 +76,67 @@ export interface ResizeOptions {
 export interface CompressOptions {
   format?: string;
   q?: number;
+  /** Smallest file with SSIM >= target (0 < v <= 1). Excludes q; needs explicit jpeg/webp/avif format. */
+  quality_target?: number;
   strip?: boolean;
+  autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
 
 export interface ConvertOptions {
   q?: number;
+  /** Smallest file with SSIM >= target (0 < v <= 1). Excludes q and lossless; jpeg/webp/avif only. */
+  quality_target?: number;
   strip?: boolean;
   lossless?: boolean;
   effort?: number;
+  autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
+  delivery?: DeliveryTarget;
+  [extra: string]: unknown;
+}
+
+export interface OptimizeGeneratedOptions {
+  /** webp (server default), avif, jpeg or png. */
+  format?: string;
+  q?: number;
+  /** Smallest file with SSIM >= target (0 < v <= 1). Excludes q. */
+  quality_target?: number;
+  /** Cap on the longest side in pixels; never upscales. */
+  max_dimension?: number;
+  /** Server default true. */
+  strip?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
 
 export interface CropOptions {
   format?: string;
+  /** Smart-crop mode: picks the window automatically. Requires width/height; excludes x/y and trim. */
+  gravity?: Gravity;
+  /** Trim mode: removes a uniform background border. Excludes x/y/width/height/gravity. */
+  trim?: boolean;
+  /** Trim sensitivity (must be positive; default 10.0 server-side). Only valid with trim: true. */
+  threshold?: number;
+  autorot?: boolean;
+  /** Median denoise before the operation: radius 1-3. Opt-in, base price. */
+  denoise?: number;
+  /** Auto-contrast (value-channel histogram equalisation, hue/saturation preserved) before the operation. */
+  equalize?: boolean;
+  /** Unsharp-mask sharpen after the operation (libvips defaults). */
+  sharpen?: boolean;
   delivery?: DeliveryTarget;
   [extra: string]: unknown;
 }
@@ -135,15 +196,29 @@ export class Client {
     return this.op("/v1/convert", { source, format }, options);
   }
 
+  async optimizeGenerated(source: string, options: OptimizeGeneratedOptions = {}): Promise<OpResult> {
+    return this.op("/v1/optimize_generated", { source }, options);
+  }
+
+  /**
+   * Three mutually exclusive modes: manual (x+y+width+height), smart
+   * (`gravity` in options + width+height, x/y null), trim (`trim: true` in
+   * options, x/y/width/height null). `autorot` is valid in all three.
+   */
   async crop(
     source: string,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
+    x: number | null,
+    y: number | null,
+    width: number | null,
+    height: number | null,
     options: CropOptions = {},
   ): Promise<OpResult> {
-    return this.op("/v1/crop", { source, x, y, width, height }, options);
+    const body: Record<string, unknown> = { source };
+    if (x !== null) body.x = x;
+    if (y !== null) body.y = y;
+    if (width !== null) body.width = width;
+    if (height !== null) body.height = height;
+    return this.op("/v1/crop", body, options);
   }
 
   async pipeline(

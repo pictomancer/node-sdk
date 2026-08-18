@@ -11,6 +11,7 @@ export {
   type FormatSpec,
   type InfoResponse,
   type OpResult,
+  type OptimizeGeneratedOptions,
   type PipelineOperation,
   type PipelineOptions,
   type ResizeOptions,

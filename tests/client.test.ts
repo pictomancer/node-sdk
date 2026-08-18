@@ -148,6 +148,14 @@ describe("operation request bodies", () => {
     expect(requests[0].body).toEqual({ source: SOURCE, format: "jpeg", q: 60, strip: true });
   });
 
+  it("compress sends quality_target", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp", quality_target: 0.95 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", quality_target: 0.95 });
+  });
+
   it("convert sends format and encoder knobs", async () => {
     const { client, requests } = newTestClient({ body: IMAGE_BYTES });
 
@@ -160,6 +168,36 @@ describe("operation request bodies", () => {
       q: 50,
       effort: 2,
       lossless: false,
+    });
+  });
+
+  it("convert sends quality_target", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.convert(SOURCE, "avif", { quality_target: 0.9 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", quality_target: 0.9 });
+  });
+
+  it("optimizeGenerated sends only source by default", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.optimizeGenerated(SOURCE);
+
+    expect(requests[0].url).toBe("https://api.pictomancer.ai/v1/optimize_generated");
+    expect(requests[0].body).toEqual({ source: SOURCE });
+  });
+
+  it("optimizeGenerated forwards format, max_dimension and quality_target", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.optimizeGenerated(SOURCE, { format: "avif", max_dimension: 1600, quality_target: 0.9 });
+
+    expect(requests[0].body).toEqual({
+      source: SOURCE,
+      format: "avif",
+      max_dimension: 1600,
+      quality_target: 0.9,
     });
   });
 
@@ -206,6 +244,130 @@ describe("operation request bodies", () => {
     await client.resize(SOURCE, { scale: 0.5, format: undefined });
 
     expect(requests[0].body).toEqual({ source: SOURCE, scale: 0.5 });
+  });
+});
+
+describe("geometry ops", () => {
+  it("resize sends fill mode params without scale", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.resize(SOURCE, { width: 200, height: 150, gravity: "entropy" });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, width: 200, height: 150, gravity: "entropy" });
+  });
+
+  it("resize sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.resize(SOURCE, { scale: 0.5, autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, scale: 0.5, autorot: true });
+  });
+
+  it("compress sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp", autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", autorot: true });
+  });
+
+  it("convert sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.convert(SOURCE, "avif", { autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", autorot: true });
+  });
+
+  it("crop smart mode sends gravity without x/y", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, null, null, 200, 200, { gravity: "attention" });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, width: 200, height: 200, gravity: "attention" });
+  });
+
+  it("crop trim mode sends threshold without dims", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, null, null, null, null, { trim: true, threshold: 5 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, trim: true, threshold: 5 });
+  });
+
+  it("crop manual mode regression with numeric args", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, 10, 20, 300, 400, { format: "png" });
+
+    expect(requests[0].body).toEqual({
+      source: SOURCE,
+      x: 10,
+      y: 20,
+      width: 300,
+      height: 400,
+      format: "png",
+    });
+  });
+
+  it("crop sends autorot", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, 0, 0, 100, 100, { autorot: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, x: 0, y: 0, width: 100, height: 100, autorot: true });
+  });
+});
+
+describe("enhance ops", () => {
+  it("resize sends sharpen", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.resize(SOURCE, { scale: 0.5, sharpen: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, scale: 0.5, sharpen: true });
+  });
+
+  it("compress sends denoise", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp", denoise: 2 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", denoise: 2 });
+  });
+
+  it("convert sends equalize", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.convert(SOURCE, "avif", { equalize: true });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "avif", equalize: true });
+  });
+
+  it("crop sends the three enhance params", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.crop(SOURCE, 0, 0, 100, 100, { denoise: 1, equalize: true, sharpen: true });
+
+    expect(requests[0].body).toEqual({
+      source: SOURCE,
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      denoise: 1,
+      equalize: true,
+      sharpen: true,
+    });
+  });
+
+  it("enhance params are omitted by default", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.compress(SOURCE, { format: "webp" });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp" });
   });
 });
 
