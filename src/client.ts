@@ -122,6 +122,15 @@ export interface OptimizeGeneratedOptions {
   [extra: string]: unknown;
 }
 
+export interface RemoveBackgroundOptions {
+  /** png (server default), webp or avif. No jpeg: the output keeps transparency. */
+  format?: string;
+  /** 1-100; webp and avif only, png ignores it. */
+  q?: number;
+  delivery?: DeliveryTarget;
+  [extra: string]: unknown;
+}
+
 export interface CropOptions {
   format?: string;
   /** Smart-crop mode: picks the window automatically. Requires width/height; excludes x/y and trim. */
@@ -198,6 +207,10 @@ export class Client {
 
   async optimizeGenerated(source: string, options: OptimizeGeneratedOptions = {}): Promise<OpResult> {
     return this.op("/v1/optimize_generated", { source }, options);
+  }
+
+  async removeBackground(source: string, options: RemoveBackgroundOptions = {}): Promise<OpResult> {
+    return this.op("/v1/remove_background", { source }, options);
   }
 
   /**
