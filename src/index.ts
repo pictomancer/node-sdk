@@ -14,6 +14,7 @@ export {
   type OptimizeGeneratedOptions,
   type PipelineOperation,
   type PipelineOptions,
+  type RemoveBackgroundOptions,
   type ResizeOptions,
   type UsageResponse,
 } from "./client.js";

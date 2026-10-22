@@ -137,6 +137,14 @@ Image generators (gpt-image, DALL-E, Flux, Midjourney, Stable Diffusion) return 
 const out = await client.optimizeGenerated("https://example.com/gen.png", { format: "avif", max_dimension: 1600 });
 ```
 
+## Background removal
+
+remove_background cuts the subject out of its background and returns it as png (default), webp or avif. The output keeps transparency, so jpeg is not allowed. Optional q (1-100) applies to webp and avif only; png ignores it.
+
+```ts
+const cutout = await client.removeBackground("https://example.com/photo.jpg", { format: "webp", q: 80 });
+```
+
 ## Delivery targets
 
 By default the optimized bytes come back inline. For large or async jobs, deliver straight to your storage or endpoint instead - the op then returns a JSON receipt:

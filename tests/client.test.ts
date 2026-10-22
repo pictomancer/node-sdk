@@ -201,6 +201,23 @@ describe("operation request bodies", () => {
     });
   });
 
+  it("removeBackground sends only source by default", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.removeBackground(SOURCE);
+
+    expect(requests[0].url).toBe("https://api.pictomancer.ai/v1/remove_background");
+    expect(requests[0].body).toEqual({ source: SOURCE });
+  });
+
+  it("removeBackground forwards format and q", async () => {
+    const { client, requests } = newTestClient({ body: IMAGE_BYTES });
+
+    await client.removeBackground(SOURCE, { format: "webp", q: 80 });
+
+    expect(requests[0].body).toEqual({ source: SOURCE, format: "webp", q: 80 });
+  });
+
   it("crop sends region coordinates", async () => {
     const { client, requests } = newTestClient({ body: IMAGE_BYTES });
 
